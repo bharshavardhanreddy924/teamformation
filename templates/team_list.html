@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Available Teams - Team Formation{% endblock %}
+
+{% block head %}
+<style>
+    .team-card {
+        transition: all 0.3s ease;
+    }
+    
+    .team-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .team-stats {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    
+    .stat-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: white;
+        font-size: 14px;
+    }
+    
+    .cluster-cs {
+        background-color: var(--success-color);
+    }
+    
+    .cluster-ec {
+        background-color: var(--warning-color);
+    }
+    
+    .cluster-me {
+        background-color: var(--danger-color);
+    }
+    
+    .cluster-total {
+        background-color: var(--primary-color);
+    }
+    
+    .filter-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-list-task me-2"></i>Available Teams</h2>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<div class="filter-section">
+    <div class="row align-items-center">
+        <div class="col-md-4">
+            <h5 class="mb-0"><i class="bi bi-funnel-fill me-2"></i>Filter Teams</h5>
+        </div>
+        <div class="col-md-8">
+            <div class="d-flex gap-2 justify-content-md-end">
+                <select id="clusterFilter" class="form-select form-select-sm" style="width: auto;">
+                    <option value="all">All Clusters</option>
+                    <option value="CS">Needs CS Members</option>
+                    <option value="EC">Needs EC Members</option>
+                    <option value="ME">Needs ME Members</option>
+                </select>
+                <select id="statusFilter" class="form-select form-select-sm" style="width: auto;">
+                    <option value="all">All Teams</option>
+                    <option value="available" selected>Can Join/Merge</option>
+                    <option value="full">Full Teams</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="teamsContainer">
+    {% if teams %}
+        {% for team in teams %}
+        <div class="col-lg-4 col-md-6 mb-4 team-item" 
+             data-needs-cs="{{ team.needs.CS > 0 }}" 
+             data-needs-ec="{{ team.needs.EC > 0 }}" 
+             data-needs-me="{{ team.needs.ME > 0 }}"
+             data-available="{{ team.can_join or team.can_merge }}">
+            <div class="card h-100 shadow-sm team-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ team.name }}</h5>
+                    {% if team.members == 6 %}
+                    <span class="badge bg-secondary">Full</span>
+                    {% else %}
+                    <span class="badge bg-primary">{{ team.members }}/6 Members</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="team-stats">
+                        <div class="stat-circle cluster-total" title="Total Members">
+                            {{ team.members }}
+                        </div>
+                        <div class="stat-circle cluster-cs" title="CS Cluster Members">
+                            {{ team.cs_count }}
+                        </div>
+                        <div class="stat-circle cluster-ec" title="EC Cluster Members">
+                            {{ team.ec_count }}
+                        </div>
+                        <div class="stat-circle cluster-me" title="ME Cluster Members">
+                            {{ team.me_count }}
+                        </div>
+                    </div>
+                    
+                    <h6 class="mb-2">Looking For:</h6>
+                    <div class="mb-3">
+                        {% if team.needs.CS > 0 %}
+                        <span class="badge bg-success me-1">{{ team.needs.CS }} CS Members</span>
+                        {% endif %}
+                        {% if team.needs.EC > 0 %}
+                        <span class="badge bg-warning me-1">{{ team.needs.EC }} EC Members</span>
+                        {% endif %}
+                        {% if team.needs.ME > 0 %}
+                        <span class="badge bg-danger me-1">{{ team.needs.ME }} ME Members</span>
+                        {% endif %}
+                        {% if team.needs.CS == 0 and team.needs.EC == 0 and team.needs.ME == 0 %}
+                        <span class="badge bg-secondary">No specific needs</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="bg-light rounded-circle p-2 d-flex justify-content-center align-items-center" style="width: 42px; height: 42px;">
+                                <i class="bi bi-person-circle text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">{{ team.leader_name }}</h6>
+                            <small class="text-muted">{{ team.leader_usn }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-telephone-fill text-primary me-2"></i>
+                        <span>{{ team.leader_phone }}</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    {% if team.can_join %}
+                    <form method="post" action="{{ url_for('send_join_request') }}">
+                        <input type="hidden" name="team_id" value="{{ team.id }}">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-person-plus-fill me-2"></i>Send Join Request
+                        </button>
+                    </form>
+                    {% elif team.can_merge %}
+                    <form method="post" action="{{ url_for('send_merge_request') }}">
+                        <input type="hidden" name="team_id" value="{{ team.id }}">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-diagram-3-fill me-2"></i>Send Merge Request
+                        </button>
+                    </form>
+                    {% else %}
+                    <button class="btn btn-secondary w-100" disabled>
+                        <i class="bi bi-lock-fill me-2"></i>No Action Available
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill me-2"></i>There are no teams looking for members at this time.
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if user.team_id %}
+<div class="card mt-4 bg-light border-0">
+    <div class="card-body p-4">
+        <h4><i class="bi bi-info-circle-fill me-2"></i>Note:</h4>
+        <p>You are already part of a team. You can view available teams for potential team merging.</p>
+        {% if user.is_team_leader %}
+        <p>As a team leader, you can send merge requests to other teams.</p>
+        {% else %}
+        <p>Only team leaders can initiate team merge requests.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const clusterFilter = document.getElementById('clusterFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const teamItems = document.querySelectorAll('.team-item');
+        
+        function filterTeams() {
+            const clusterValue = clusterFilter.value;
+            const statusValue = statusFilter.value;
+            
+            teamItems.forEach(function(item) {
+                let showItem = true;
+                
+                // Filter by cluster
+                if (clusterValue !== 'all') {
+                    showItem = item.dataset['needs' + clusterValue] === 'True';
+                }
+                
+                // Filter by availability
+                if (showItem && statusValue !== 'all') {
+                    if (statusValue === 'available') {
+                        showItem = item.dataset.available === 'True';
+                    } else if (statusValue === 'full') {
+                        showItem = item.dataset.available === 'False';
+                    }
+                }
+                
+                item.style.display = showItem ? '' : 'none';
+            });
+            
+            // Check if there are visible teams
+            const visibleTeams = document.querySelectorAll('.team-item[style=""]').length;
+            const teamsContainer = document.getElementById('teamsContainer');
+            
+            if (visibleTeams === 0 && teamItems.length > 0) {
+                // If no teams match the filter
+                if (!document.getElementById('noTeamsMessage')) {
+                    const noTeamsMessage = document.createElement('div');
+                    noTeamsMessage.className = 'col-12';
+                    noTeamsMessage.id = 'noTeamsMessage';
+                    noTeamsMessage.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill me-2"></i>No teams match your current filters.
+                        </div>
+                    `;
+                    teamsContainer.appendChild(noTeamsMessage);
+                }
+            } else {
+                // Remove the message if it exists
+                const message = document.getElementById('noTeamsMessage');
+                if (message) {
+                    message.remove();
+                }
+            }
+        }
+        
+        clusterFilter.addEventListener('change', filterTeams);
+        statusFilter.addEventListener('change', filterTeams);
+        
+        // Initial filter
+        filterTeams();
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Available Members - Team Formation App{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5 fw-bold mb-4"><i class="bi bi-people-fill me-2"></i>Available Members</h1>
+            <p class="lead">Find potential team members to complete your team requirements.</p>
+        </div>
+    </div>
+
+    <!-- Team Needs Summary Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Your Team Needs</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-6 col-md-4">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="display-6 fw-bold text-primary mb-1">{{ team_stats.CS }}/2</div>
+                        <div class="badge bg-primary mb-2">CS Members</div>
+                        <div class="small text-muted">{{ team_stats.needs.CS }} more needed</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="display-6 fw-bold text-primary mb-1">{{ team_stats.EC }}/2</div>
+                        <div class="badge bg-primary mb-2">EC Members</div>
+                        <div class="small text-muted">{{ team_stats.needs.EC }} more needed</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="display-6 fw-bold text-primary mb-1">{{ team_stats.ME }}/2</div>
+                        <div class="badge bg-primary mb-2">ME Members</div>
+                        <div class="small text-muted">{{ team_stats.needs.ME }} more needed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0"><i class="bi bi-funnel-fill me-2"></i>Filter Members</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4 col-sm-6">
+                    <label for="clusterFilter" class="form-label">Cluster</label>
+                    <select id="clusterFilter" class="form-select">
+                        <option value="all">All Clusters</option>
+                        <option value="CS">Computer Science</option>
+                        <option value="EC">Electronics</option>
+                        <option value="ME">Mechanical</option>
+                    </select>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <label for="skillFilter" class="form-label">Skills</label>
+                    <input type="text" id="skillFilter" class="form-control" placeholder="e.g. python, machine learning">
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <label for="sortBy" class="form-label">Sort By</label>
+                    <select id="sortBy" class="form-select">
+                        <option value="match">Match Percentage</option>
+                        <option value="name">Name</option>
+                        <option value="cluster">Cluster</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="membersContainer">
+        {% for member in available_members %}
+        <div class="col-lg-4 col-md-6 mb-4 member-card" 
+             data-cluster="{{ member.cluster }}" 
+             data-skills="{{ member.skills|join(',') }}" 
+             data-match="{{ member.match_percentage|default(0) }}">
+            <div class="card h-100 shadow-sm card-hover">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-truncate">{{ member.name }}</h5>
+                    <span class="badge bg-primary rounded-pill">{{ member.cluster }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <p class="card-text text-muted mb-1">Student ID</p>
+                        <p class="card-text">{{ member.usn }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="card-text text-muted mb-1">Skills</p>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for skill in member.skills %}
+                            <span class="badge bg-light text-dark">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    {% if member.match_percentage %}
+                    <div class="mb-3">
+                        <p class="card-text text-muted mb-1">Match with your team</p>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ member.match_percentage }}%" 
+                                 aria-valuenow="{{ member.match_percentage }}" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                                {{ member.match_percentage|round }}%
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if member.cluster_needed %}
+                    <div class="mb-3">
+                        <div class="alert alert-success py-2 mb-0">
+                            <i class="bi bi-check-circle-fill me-2"></i>Your team needs a {{ member.cluster }} member
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white border-top pt-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <a href="tel:{{ member.phone }}" class="text-decoration-none text-primary">
+                            <i class="bi bi-telephone-fill me-1"></i>
+                            <span class="d-inline-block text-truncate" style="max-width: 140px;">{{ member.phone }}</span>
+                        </a>
+                        <form method="post" action="{{ url_for('send_invitation') }}">
+                            <input type="hidden" name="member_id" value="{{ member._id }}">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-envelope-fill me-2"></i>Invite
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if not available_members %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        There are currently no available members matching your criteria.
+    </div>
+    {% endif %}
+    
+    <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const memberCards = document.querySelectorAll('.member-card');
+        const clusterFilter = document.getElementById('clusterFilter');
+        const skillFilter = document.getElementById('skillFilter');
+        const sortBy = document.getElementById('sortBy');
+        
+        function filterMembers() {
+            const clusterValue = clusterFilter.value;
+            const skillValue = skillFilter.value.toLowerCase();
+            let visibleCount = 0;
+            
+            memberCards.forEach(card => {
+                const cardCluster = card.getAttribute('data-cluster');
+                const cardSkills = card.getAttribute('data-skills').toLowerCase();
+                
+                const clusterMatch = clusterValue === 'all' || cardCluster === clusterValue;
+                const skillMatch = skillValue === '' || cardSkills.includes(skillValue);
+                
+                if (clusterMatch && skillMatch) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Show no results message if needed
+            const noResultsEl = document.querySelector('.alert-info');
+            if (noResultsEl) {
+                if (visibleCount === 0) {
+                    noResultsEl.style.display = '';
+                } else {
+                    noResultsEl.style.display = 'none';
+                }
+            }
+        }
+        
+        function sortMembers() {
+            const container = document.getElementById('membersContainer');
+            const cards = Array.from(memberCards);
+            
+            switch(sortBy.value) {
+                case 'match':
+                    cards.sort((a, b) => 
+                        parseFloat(b.getAttribute('data-match')) - 
+                        parseFloat(a.getAttribute('data-match'))
+                    );
+                    break;
+                case 'name':
+                    cards.sort((a, b) => 
+                        a.querySelector('h5').textContent.localeCompare(
+                            b.querySelector('h5').textContent
+                        )
+                    );
+                    break;
+                case 'cluster':
+                    cards.sort((a, b) => 
+                        a.getAttribute('data-cluster').localeCompare(
+                            b.getAttribute('data-cluster')
+                        )
+                    );
+                    break;
+            }
+            
+            // Remove all cards and re-append in new order
+            cards.forEach(card => container.appendChild(card));
+        }
+        
+        clusterFilter.addEventListener('change', filterMembers);
+        skillFilter.addEventListener('input', filterMembers);
+        sortBy.addEventListener('change', sortMembers);
+        
+        // Initial sort
+        sortMembers();
+        
+        // Add touch-friendly interactions
+        document.querySelectorAll('.card-hover').forEach(function(card) {
+            card.addEventListener('touchstart', function() {
+                this.classList.add('shadow');
+            });
+            
+            card.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.classList.remove('shadow');
+                }, 300);
+            });
+        });
+    });
+</script>
+{% endblock %} 

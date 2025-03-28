@@ -1,0 +1,468 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Team Formation{% endblock %}
+
+{% block head %}
+<style>
+    .dashboard-stat {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        background-color: white;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: all 0.3s;
+    }
+    
+    .dashboard-stat:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .dashboard-stat .icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-stat .number {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-stat .label {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .progress-circle {
+        position: relative;
+        display: inline-block;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1rem;
+    }
+    
+    .progress-circle canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    
+    .progress-circle .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .welcome-section {
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+        border-radius: 0.5rem;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .team-status-card {
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .team-member-avatar {
+        width: 48px;
+        height: 48px;
+        background-color: var(--light-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .completion-bar {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #e9ecef;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    
+    .completion-progress {
+        height: 100%;
+        border-radius: 4px;
+    }
+    
+    .request-card {
+        transition: all 0.3s;
+    }
+    
+    .request-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="welcome-section shadow">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold mb-2">Welcome, {{ user.name }}!</h1>
+            <p class="lead mb-0">
+                {{ user.branch }} ({{ user.cluster }} Cluster) | USN: {{ user.usn }}
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            {% if user.team_id %}
+                {% if user.is_team_leader %}
+                <span class="badge bg-warning p-2 mb-2 d-inline-block">
+                    <i class="bi bi-star-fill me-1"></i> Team Leader
+                </span>
+                {% else %}
+                <span class="badge bg-info p-2 mb-2 d-inline-block">
+                    <i class="bi bi-person-fill me-1"></i> Team Member
+                </span>
+                {% endif %}
+            {% else %}
+                <span class="badge bg-secondary p-2 mb-2 d-inline-block">
+                    <i class="bi bi-search me-1"></i> Looking for Team
+                </span>
+            {% endif %}
+            <p class="mb-0"><i class="bi bi-telephone-fill me-2"></i>{{ user.phone }}</p>
+        </div>
+    </div>
+</div>
+
+{% if not user.team_id %}
+<!-- User without a team -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4 mb-md-0">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-plus-circle-fill me-2"></i>Create Your Team</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <div class="bg-light rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-people-fill text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4>Start Your Interdisciplinary Project Team</h4>
+                    <p class="text-muted">Create a team and invite members from different clusters to join</p>
+                </div>
+                <form method="post" action="{{ url_for('create_team') }}">
+                    <div class="mb-3">
+                        <label for="team_name" class="form-label">Team Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-people"></i></span>
+                            <input type="text" class="form-control" id="team_name" name="team_name" placeholder="Enter a creative team name" required>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle me-2"></i>Create Team
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-search me-2"></i>Find Existing Team</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <div class="bg-light rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-list-ul text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4>Join an Existing Team</h4>
+                    <p class="text-muted">Find teams that need members from your cluster</p>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <div class="card bg-light h-100">
+                            <div class="card-body text-center">
+                                <div class="display-4 fw-bold text-success">{{ available_teams|length }}</div>
+                                <p class="mb-0">Teams need {{ user.cluster }} members</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light h-100">
+                            <div class="card-body text-center">
+                                <p class="mb-2">Your Cluster</p>
+                                <span class="badge {% if user.cluster == 'CS' %}bg-success{% elif user.cluster == 'EC' %}bg-warning{% else %}bg-danger{% endif %} p-2">
+                                    {{ user.cluster }} Cluster
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid">
+                    <a href="{{ url_for('team_list') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-list-ul me-2"></i>View Available Teams
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Team Invitations Section -->
+{% if pending_invitations %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0"><i class="bi bi-envelope-fill me-2"></i>Team Invitations</h3>
+    </div>
+    <div class="card-body">
+        <p class="lead">You have been invited to join the following teams:</p>
+        
+        <div class="row">
+            {% for invitation in pending_invitations %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ invitation.team_name }}</h5>
+                        <span class="badge bg-primary rounded-pill">Invitation</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="mb-1">Team Leader</h6>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle text-primary me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <p class="mb-0">{{ invitation.leader_name }}</p>
+                                    <small class="text-muted">{{ invitation.leader_phone }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <form method="post" action="{{ url_for('process_invitation') }}">
+                                <input type="hidden" name="invitation_id" value="{{ invitation._id }}">
+                                <input type="hidden" name="action" value="accept">
+                                <button type="submit" class="btn btn-success w-100 mb-2">
+                                    <i class="bi bi-check-circle-fill me-2"></i>Accept
+                                </button>
+                            </form>
+                            <form method="post" action="{{ url_for('process_invitation') }}">
+                                <input type="hidden" name="invitation_id" value="{{ invitation._id }}">
+                                <input type="hidden" name="action" value="reject">
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="bi bi-x-circle-fill me-2"></i>Decline
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if available_teams %}
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0"><i class="bi bi-star-fill me-2"></i>Recommended Teams</h3>
+    </div>
+    <div class="card-body">
+        <p class="mb-4">These teams specifically need members from your cluster ({{ user.cluster }}):</p>
+        <div class="row">
+            {% for team in available_teams %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm card-hover">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ team.name }}</h5>
+                        <span class="badge bg-primary">{{ team.stats.total }}/6</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around mb-3">
+                            <div class="text-center">
+                                <div class="rounded-circle bg-success d-flex justify-content-center align-items-center mx-auto mb-2" style="width: 36px; height: 36px; color: white;">
+                                    {{ team.stats.CS }}
+                                </div>
+                                <small>CS</small>
+                            </div>
+                            <div class="text-center">
+                                <div class="rounded-circle bg-warning d-flex justify-content-center align-items-center mx-auto mb-2" style="width: 36px; height: 36px; color: white;">
+                                    {{ team.stats.EC }}
+                                </div>
+                                <small>EC</small>
+                            </div>
+                            <div class="text-center">
+                                <div class="rounded-circle bg-danger d-flex justify-content-center align-items-center mx-auto mb-2" style="width: 36px; height: 36px; color: white;">
+                                    {{ team.stats.ME }}
+                                </div>
+                                <small>ME</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="mb-1">Team Leader</h6>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle text-primary me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <p class="mb-0">{{ team.leader.name }}</p>
+                                    <small class="text-muted">{{ team.leader.phone }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form method="post" action="{{ url_for('send_join_request') }}">
+                            <input type="hidden" name="team_id" value="{{ team.id }}">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-send-fill me-2"></i>Send Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<!-- User with a team -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm team-status-card h-100">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-people-fill me-2"></i>{{ team.name }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    {% set total_percentage = ((team_stats.total / 6) * 100)|int %}
+                    {% set completion_percentage = 0 %}
+                    {% if team_stats.is_complete %}
+                        {% set completion_percentage = 100 %}
+                    {% elif team_stats.CS == 2 and team_stats.EC == 2 and team_stats.ME >= 1 %}
+                        {% set completion_percentage = 100 %}
+                    {% else %}
+                        {% set cs_percent = team_stats.CS / 2 %}
+                        {% set ec_percent = team_stats.EC / 2 %}
+                        {% set me_percent = team_stats.ME %}
+                        {% if team_stats.ME > 1 %}
+                            {% set me_percent = 1 %}
+                        {% endif %}
+                        {% set completion_percentage = ((cs_percent + ec_percent + me_percent) / 3 * 100)|int %}
+                    {% endif %}
+                    
+                    <div class="progress-circle" id="teamProgress">
+                        <canvas width="120" height="120"></canvas>
+                        <div class="progress-text">{{ completion_percentage }}%</div>
+                    </div>
+                    
+                    <h4 class="mb-3">Team Completion</h4>
+                    
+                    <div class="d-flex justify-content-center gap-3 mb-3">
+                        <div class="text-center">
+                            <div class="rounded-circle bg-success d-flex justify-content-center align-items-center mx-auto mb-1" style="width: 46px; height: 46px; color: white; font-weight: bold;">
+                                {{ team_stats.CS }}/2
+                            </div>
+                            <small>CS</small>
+                        </div>
+                        <div class="text-center">
+                            <div class="rounded-circle bg-warning d-flex justify-content-center align-items-center mx-auto mb-1" style="width: 46px; height: 46px; color: white; font-weight: bold;">
+                                {{ team_stats.EC }}/2
+                            </div>
+                            <small>EC</small>
+                        </div>
+                        <div class="text-center">
+                            <div class="rounded-circle bg-danger d-flex justify-content-center align-items-center mx-auto mb-1" style="width: 46px; height: 46px; color: white; font-weight: bold;">
+                                {{ team_stats.ME }}/1+
+                            </div>
+                            <small>ME</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="completion-bar">
+                    <div class="completion-progress bg-primary" style="width: {{ total_percentage }}%"></div>
+                </div>
+                
+                <div class="text-center mb-4">
+                    <h5>{{ team_stats.total }} / 6 Members</h5>
+                    
+                    {% if team_stats.is_complete %}
+                    <div class="alert alert-success mt-3">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Team is complete!</strong> Good luck with your project!
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Team is incomplete!</strong><br>
+                        You need: 
+                        {% if team_stats.needs.CS > 0 %}{{ team_stats.needs.CS }} more CS members{% endif %}
+                        {% if team_stats.needs.EC > 0 %}{% if team_stats.needs.CS > 0 %}, {% endif %}{{ team_stats.needs.EC }} more EC members{% endif %}
+                        {% if team_stats.needs.ME > 0 %}{% if team_stats.needs.CS > 0 or team_stats.needs.EC > 0 %}, {% endif %}{{ team_stats.needs.ME }} more ME members{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-grid gap-2">
+                    {% if user.is_team_leader and not team_stats.is_complete %}
+                    <a href="{{ url_for('team_list') }}" class="btn btn-primary">
+                        <i class="bi bi-search me-2"></i>Find Teams to Merge
+                    </a>
+                    <a href="{{ url_for('available_members') }}" class="btn btn-success">
+                        <i class="bi bi-person-plus-fill me-2"></i>Find Individual Members
+                    </a>
+                    {% endif %}
+                    <form method="post" action="{{ url_for('leave_team') }}" class="d-grid">
+                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to leave this team?');">
+                            <i class="bi bi-box-arrow-left me-2"></i>Leave Team
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Continue with the existing dashboard content (team members table, pending requests, etc.) -->
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Draw progress circle for team completion if exists
+        const progressCircle = document.getElementById('teamProgress');
+        if (progressCircle) {
+            const canvas = progressCircle.querySelector('canvas');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 45;
+            const percentComplete = parseFloat(progressCircle.querySelector('.progress-text').textContent);
+            const percentValue = percentComplete / 100;
+            const startAngle = -0.5 * Math.PI;
+            const endAngle = startAngle + (2 * Math.PI * percentValue);
+            const color = percentComplete === 100 ? '#43a047' : '#3949ab';
+            
+            // Draw background circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.lineWidth = 12;
+            ctx.strokeStyle = '#e9ecef';
+            ctx.stroke();
+            
+            // Draw progress arc
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.lineWidth = 12;
+            ctx.strokeStyle = color;
+            ctx.stroke();
+        }
+    });
+</script>
+{% endblock %}

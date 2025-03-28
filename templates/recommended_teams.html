@@ -1,0 +1,68 @@
+<!-- templates/recommended_teams.html -->
+{% extends "base.html" %}
+
+{% block title %}Recommended Teams - Team Formation{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Recommended Teams</h2>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Teams That Need {{ user.cluster }} Members</h3>
+            </div>
+            <div class="card-body">
+                {% if recommended_teams %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Team Name</th>
+                                <th>Current Members</th>
+                                <th>CS</th>
+                                <th>EC</th>
+                                <th>ME</th>
+                                <th>Team Leader</th>
+                                <th>Contact</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in recommended_teams %}
+                            <tr>
+                                <td>{{ team.team.name }}</td>
+                                <td>{{ team.team.members|length }}/6</td>
+                                <td>{{ team.team.cs_count }}/2</td>
+                                <td>{{ team.team.ec_count }}/2</td>
+                                <td>{{ team.team.me_count }}/1+</td>
+                                <td>{{ team.team.leader_name }}</td>
+                                <td>{{ team.team.leader_phone }}</td>
+                                <td>
+                                    <form method="post" action="{{ url_for('send_join_request') }}">
+                                        <input type="hidden" name="team_id" value="{{ team.team._id }}">
+                                        <button type="submit" class="btn btn-sm btn-success">Send Join Request</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <p>There are no teams currently looking for members from your cluster.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

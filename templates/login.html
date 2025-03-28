@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Team Formation{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow border-0">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="bi bi-box-arrow-in-right me-2"></i>Login</h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="usn" class="form-label">USN</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" id="usn" name="usn" placeholder="e.g. 1RV21CS001" required autofocus>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3 bg-light">
+                <p class="mb-0">Don't have an account? <a href="{{ url_for('register') }}" class="text-primary">Register</a></p>
+            </div>
+        </div>
+
+        <div class="card mt-4 bg-light border-0">
+            <div class="card-body p-3">
+                <h6 class="mb-2 text-center">Sample Credentials for Testing</h6>
+                <div class="table-responsive small">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Cluster</th>
+                                <th>USN</th>
+                                <th>Password</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-success">CS</span></td>
+                                <td>1RV21CS001</td>
+                                <td>password</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-warning">EC</span></td>
+                                <td>1RV21EC005</td>
+                                <td>password</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-danger">ME</span></td>
+                                <td>1RV21ME009</td>
+                                <td>password</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

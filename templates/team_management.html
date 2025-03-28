@@ -1,0 +1,31 @@
+
+<!-- templates/team_management.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Team Requests</h2>
+        {% if requests %}
+            {% for request in requests %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5>Request from: {{ request.from_username }}</h5>
+                        <form method="POST" action="{{ url_for('process_request') }}" class="d-inline">
+                            <input type="hidden" name="request_id" value="{{ request._id }}">
+                            <input type="hidden" name="action" value="accept">
+                            <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('process_request') }}" class="d-inline">
+                            <input type="hidden" name="request_id" value="{{ request._id }}">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No pending team requests.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

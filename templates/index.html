@@ -1,0 +1,157 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Welcome - Interdisciplinary Project Team Formation{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-5">
+    <div class="col-lg-6 pe-lg-5">
+        <h1 class="display-4 fw-bold mb-4 text-primary">Form Your Interdisciplinary Project Team</h1>
+        <p class="lead mb-4">Easily find teammates from different clusters for your VI Semester BE Interdisciplinary Project (XX367P).</p>
+        <div class="d-grid gap-2 d-md-flex mb-4">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                <i class="bi bi-person-plus-fill me-2"></i>Get Started
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg px-4">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-6 mt-4 mt-lg-0">
+        <div class="card border-0 shadow">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Team Requirements</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary rounded-circle p-3 d-flex justify-content-center align-items-center me-3" style="width: 48px; height: 48px;">
+                                <i class="bi bi-people-fill text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Team Size</h6>
+                                <p class="mb-0">5-6 students total</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success rounded-circle p-3 d-flex justify-content-center align-items-center me-3" style="width: 48px; height: 48px;">
+                                <i class="bi bi-laptop text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">CS Cluster</h6>
+                                <p class="mb-0">2 students needed</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning rounded-circle p-3 d-flex justify-content-center align-items-center me-3" style="width: 48px; height: 48px;">
+                                <i class="bi bi-cpu text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">EC Cluster</h6>
+                                <p class="mb-0">2 students needed</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-danger rounded-circle p-3 d-flex justify-content-center align-items-center me-3" style="width: 48px; height: 48px;">
+                                <i class="bi bi-gear text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">ME Cluster</h6>
+                                <p class="mb-0">At least 1 student</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="small">
+                    <p class="mb-2 fw-bold">Clusters include:</p>
+                    <ul class="mb-0 ps-3">
+                        <li><strong>CS Cluster:</strong> AI, CS, IS, CD, CY</li>
+                        <li><strong>EC Cluster:</strong> EC, EE, EI, ET</li>
+                        <li><strong>ME Cluster:</strong> AS, BT, CH, IM, ME</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h2 class="text-center mb-4"><i class="bi bi-stars me-2"></i>Features</h2>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 card-hover">
+            <div class="card-body text-center p-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                    <i class="bi bi-search text-primary" style="font-size: 2rem;"></i>
+                </div>
+                <h5>Find Team Members</h5>
+                <p class="text-muted">Easily find students from required clusters to complete your team.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 card-hover">
+            <div class="card-body text-center p-4">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3 d-inline-flex mb-3">
+                    <i class="bi bi-diagram-3 text-success" style="font-size: 2rem;"></i>
+                </div>
+                <h5>Team Management</h5>
+                <p class="text-muted">Create teams, accept join requests, and manage team composition.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 card-hover">
+            <div class="card-body text-center p-4">
+                <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex mb-3">
+                    <i class="bi bi-shuffle text-warning" style="font-size: 2rem;"></i>
+                </div>
+                <h5>Team Merging</h5>
+                <p class="text-muted">Merge with other teams to meet all composition requirements.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <div class="card bg-light border-0">
+            <div class="card-body p-4">
+                <h4 class="text-primary"><i class="bi bi-clock-history me-2"></i>Important Dates</h4>
+                <div class="row mt-3">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="fw-bold">Phase 1</h6>
+                            <p class="mb-1">Project topic, title, and synopsis submission</p>
+                            <p class="mb-0 badge bg-primary">Deadline: April 8, 2025</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="fw-bold">Phase 2</h6>
+                            <p class="mb-1">Implementation of methodology and analysis of results</p>
+                            <p class="mb-0 badge bg-primary">May 26-28, 2025</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="fw-bold">Phase 3</h6>
+                            <p class="mb-1">Final presentation with draft project report and paper</p>
+                            <p class="mb-0 badge bg-primary">July 7-9, 2025</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
